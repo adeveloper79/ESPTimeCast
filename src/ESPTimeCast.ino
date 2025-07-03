@@ -514,7 +514,7 @@ void fetchWeather() {
 }
 
 void setup() {
-  Serial.begin(74880);
+  Serial.begin(115200);
   Serial.println();
   Serial.println(F("[SETUP] Starting setup..."));
   P.begin();
