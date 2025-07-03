@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <MD_Parola.h>
 #include <MD_MAX72XX.h>
 #include <SPI.h>
-#include <ESPAsyncTCP.h>
+#include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <DNSServer.h>
 #include <sntp.h>
@@ -224,9 +224,11 @@ void connectWiFi() {
 void setupTime() {
   sntp_stop();
   Serial.println(F("[TIME] Starting NTP sync..."));
-  configTime(0, 0, ntpServer1, ntpServer2); // Use custom NTP servers
-  setenv("TZ", ianaToPosix(timeZone), 1);
-  tzset();
+
+  // ESP32 uses configTzTime
+  const char* posixTz = ianaToPosix(timeZone);
+  configTzTime(posixTz, ntpServer1, ntpServer2);
+  
   ntpState = NTP_SYNCING;
   ntpStartTime = millis();
   ntpRetryCount = 0;
