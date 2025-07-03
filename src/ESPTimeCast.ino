@@ -78,36 +78,36 @@ const int maxNtpRetries = 30;
 int ntpRetryCount = 0;
 
 void printConfigToSerial() {
-  Serial.println(F("========= Loaded Configuration ========="));
-  Serial.print(F("WiFi SSID: ")); Serial.println(ssid);
-  Serial.print(F("WiFi Password: ")); Serial.println(password);
-  Serial.print(F("OpenWeather City: ")); Serial.println(openWeatherCity);
-  Serial.print(F("OpenWeather Country: ")); Serial.println(openWeatherCountry);
-  Serial.print(F("OpenWeather API Key: ")); Serial.println(openWeatherApiKey);
-  Serial.print(F("Temperature Unit: ")); Serial.println(weatherUnits);
-  Serial.print(F("Clock duration: ")); Serial.println(clockDuration);
-  Serial.print(F("Weather duration: ")); Serial.println(weatherDuration);
-  Serial.print(F("TimeZone (IANA): ")); Serial.println(timeZone);
-  Serial.print(F("Brightness: ")); Serial.println(brightness);
-  Serial.print(F("Flip Display: ")); Serial.println(flipDisplay ? "Yes" : "No");
-  Serial.print(F("Show 12h Clock: ")); Serial.println(twelveHourToggle ? "Yes" : "No");
-  Serial.print(F("Show Day of the Week: ")); Serial.println(showDayOfWeek ? "Yes" : "No");
-  Serial.print(F("Show Humidity ")); Serial.println(showHumidity ? "Yes" : "No");
-  Serial.print(F("NTP Server 1: ")); Serial.println(ntpServer1);
-  Serial.print(F("NTP Server 2: ")); Serial.println(ntpServer2);
-  Serial.println(F("========================================"));
+  Serial.printf("========= Loaded Configuration =========");
+  Serial.printf("WiFi SSID: "); Serial.println(ssid);
+  Serial.printf("WiFi Password: "); Serial.println(password);
+  Serial.printf("OpenWeather City: "); Serial.println(openWeatherCity);
+  Serial.printf("OpenWeather Country: "); Serial.println(openWeatherCountry);
+  Serial.printf("OpenWeather API Key: "); Serial.println(openWeatherApiKey);
+  Serial.printf("Temperature Unit: "); Serial.println(weatherUnits);
+  Serial.printf("Clock duration: "); Serial.println(clockDuration);
+  Serial.printf("Weather duration: "); Serial.println(weatherDuration);
+  Serial.printf("TimeZone (IANA): "); Serial.println(timeZone);
+  Serial.printf("Brightness: "); Serial.println(brightness);
+  Serial.printf("Flip Display: "); Serial.println(flipDisplay ? "Yes" : "No");
+  Serial.printf("Show 12h Clock: "); Serial.println(twelveHourToggle ? "Yes" : "No");
+  Serial.printf("Show Day of the Week: "); Serial.println(showDayOfWeek ? "Yes" : "No");
+  Serial.printf("Show Humidity "); Serial.println(showHumidity ? "Yes" : "No");
+  Serial.printf("NTP Server 1: "); Serial.println(ntpServer1);
+  Serial.printf("NTP Server 2: "); Serial.println(ntpServer2);
+  Serial.println("========================================");
   Serial.println();
 }
 
 void loadConfig() {
-  Serial.println(F("[CONFIG] Loading configuration..."));
+  Serial.println("[CONFIG] Loading configuration...");
   if (!LittleFS.begin()) {
-    Serial.println(F("[ERROR] LittleFS mount failed"));
+    Serial.println("[ERROR] LittleFS mount failed");
     return;
   }
 
   if (!LittleFS.exists("/config.json")) {
-    Serial.println(F("[CONFIG] config.json not found, creating with defaults..."));
+    Serial.println("[CONFIG] config.json not found, creating with defaults...");
     DynamicJsonDocument doc(512);
     doc[F("ssid")] = "";
     doc[F("password")] = "";
@@ -129,19 +129,19 @@ void loadConfig() {
     if (f) {
       serializeJsonPretty(doc, f);
       f.close();
-      Serial.println(F("[CONFIG] Default config.json created."));
+      Serial.println("[CONFIG] Default config.json created.");
     } else {
-      Serial.println(F("[ERROR] Failed to create default config.json"));
+      Serial.println("[ERROR] Failed to create default config.json");
     }
   }
   File configFile = LittleFS.open("/config.json", "r");
   if (!configFile) {
-    Serial.println(F("[ERROR] Failed to open config.json"));
+    Serial.println("[ERROR] Failed to open config.json");
     return;
   }
   size_t size = configFile.size();
   if (size == 0 || size > 1024) {
-    Serial.println(F("[ERROR] Invalid config file size"));
+    Serial.println("[ERROR] Invalid config file size");
     configFile.close();
     return;
   }
@@ -150,7 +150,7 @@ void loadConfig() {
   DynamicJsonDocument doc(2048);
   DeserializationError error = deserializeJson(doc, jsonString);
   if (error) {
-    Serial.print(F("[ERROR] JSON parse failed: "));
+    Serial.printf("[ERROR] JSON parse failed: ");
     Serial.println(error.f_str());
     return;
   }
@@ -176,11 +176,11 @@ void loadConfig() {
     tempSymbol = 'K';
   else
     tempSymbol = 'C';
-  Serial.println(F("[CONFIG] Configuration loaded."));
+  Serial.println("[CONFIG] Configuration loaded.");
 }
 
 void connectWiFi() {
-  Serial.println(F("[WIFI] Connecting to WiFi..."));
+  Serial.println("[WIFI] Connecting to WiFi...");
   WiFi.disconnect(true);
   delay(100);
   WiFi.begin(ssid, password);
@@ -192,19 +192,19 @@ void connectWiFi() {
   while (animating) {
     unsigned long now = millis();
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println(F("[WiFi] Connected: ") + WiFi.localIP().toString());
+      Serial.println("[WiFi] Connected: ") + WiFi.localIP().toString();
       isAPMode = false;
       animating = false;
       break;
     } else if (now - startAttemptTime >= timeout) {
-      Serial.println(F("\r\n[WiFi] Failed. Starting AP mode..."));
+      Serial.println("\r\n[WiFi] Failed. Starting AP mode...");
       WiFi.softAP("ESPTimeCast", "12345678");
-      Serial.print(F("AP IP address: "));
+      Serial.printf("AP IP address: ");
       Serial.println(WiFi.softAPIP());
       dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
       isAPMode = true;
       animating = false;
-      Serial.println(F("[WIFI] AP Mode Started"));
+      Serial.println("[WIFI] AP Mode Started");
       break;
     }
     if (now - animTimer > 750) {
@@ -223,8 +223,8 @@ void connectWiFi() {
 
 void setupTime() {
   sntp_stop();
-  Serial.println(F("[TIME] Starting NTP sync..."));
-
+  Serial.println("[TIME] Starting NTP sync...");
+  
   // ESP32 uses configTzTime
   const char* posixTz = ianaToPosix(timeZone);
   configTzTime(posixTz, ntpServer1, ntpServer2);
@@ -236,16 +236,16 @@ void setupTime() {
 }
 
 void setupWebServer() {
-  Serial.println(F("[WEBSERVER] Setting up web server..."));
+  Serial.println("[WEBSERVER] Setting up web server...");
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println(F("[WEBSERVER] Request: /"));
+    Serial.println("[WEBSERVER] Request: /");
     request->send(LittleFS, "/index.html", "text/html");
   });
   server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println(F("[WEBSERVER] Request: /config.json"));
+    Serial.println("[WEBSERVER] Request: /config.json");
     File f = LittleFS.open("/config.json", "r");
     if (!f) {
-      Serial.println(F("[WEBSERVER] Error opening /config.json"));
+      Serial.println("[WEBSERVER] Error opening /config.json");
       request->send(500, "application/json", "{\"error\":\"Failed to open config.json\"}");
       return;
     }
@@ -253,7 +253,7 @@ void setupWebServer() {
     DeserializationError err = deserializeJson(doc, f);
     f.close();
     if (err) {
-      Serial.print(F("[WEBSERVER] Error parsing /config.json: "));
+      Serial.printf("[WEBSERVER] Error parsing /config.json: ");
       Serial.println(err.f_str());
       request->send(500, "application/json", "{\"error\":\"Failed to parse config.json\"}");
       return;
@@ -264,7 +264,7 @@ void setupWebServer() {
     request->send(200, "application/json", response);
   });
   server.on("/save", HTTP_POST, [](AsyncWebServerRequest *request){
-    Serial.println(F("[WEBSERVER] Request: /save"));    
+    Serial.println("[WEBSERVER] Request: /save");    
     DynamicJsonDocument doc(2048);
     for (int i = 0; i < request->params(); i++) {
       const AsyncWebParameter* p = request->getParam(i);
@@ -282,7 +282,7 @@ void setupWebServer() {
     }
     File f = LittleFS.open("/config.json", "w");
     if (!f) {
-      Serial.println(F("[WEBSERVER] Failed to open /config.json for writing"));
+      Serial.println("[WEBSERVER] Failed to open /config.json for writing");
       DynamicJsonDocument errorDoc(256);
       errorDoc[F("error")] = "Failed to write config";
       String response;
@@ -297,7 +297,7 @@ void setupWebServer() {
     DeserializationError err = deserializeJson(test, verify);
     verify.close();
     if (err) {
-      Serial.print(F("[WEBSERVER] Config corrupted after save: "));
+      Serial.printf("[WEBSERVER] Config corrupted after save: ");
       Serial.println(err.f_str());
       DynamicJsonDocument errorDoc(256);
       errorDoc[F("error")] = "Config corrupted. Reboot cancelled.";
@@ -311,19 +311,19 @@ void setupWebServer() {
     String response;
     serializeJson(okDoc, response);
     request->send(200, "application/json", response);
-    Serial.println(F("[WEBSERVER] Rebooting..."));
+    Serial.println("[WEBSERVER] Rebooting...");
     request->onDisconnect([]() {
-      Serial.println(F("[WEBSERVER] Rebooting..."));
+      Serial.println("[WEBSERVER] Rebooting...");
       ESP.restart();
     });
   });
 
   server.on("/restore", HTTP_POST, [](AsyncWebServerRequest *request){
-    Serial.println(F("[WEBSERVER] Request: /restore"));
+    Serial.println("[WEBSERVER] Request: /restore");
     if (LittleFS.exists("/config.bak")) {
       File src = LittleFS.open("/config.bak", "r");
       if (!src) {
-        Serial.println(F("[WEBSERVER] Failed to open /config.bak"));
+        Serial.println("[WEBSERVER] Failed to open /config.bak");
         DynamicJsonDocument errorDoc(128);
         errorDoc[F("error")] = "Failed to open backup file.";
         String response;
@@ -334,7 +334,7 @@ void setupWebServer() {
       File dst = LittleFS.open("/config.json", "w");
       if (!dst) {
         src.close();
-        Serial.println(F("[WEBSERVER] Failed to open /config.json for writing"));
+        Serial.println("[WEBSERVER] Failed to open /config.json for writing");
         DynamicJsonDocument errorDoc(128);
         errorDoc[F("error")] = "Failed to open config for writing.";
         String response;
@@ -355,12 +355,12 @@ void setupWebServer() {
       serializeJson(okDoc, response);
       request->send(200, "application/json", response);
       request->onDisconnect([]() {
-        Serial.println(F("[WEBSERVER] Rebooting after restore..."));
+        Serial.println("[WEBSERVER] Rebooting after restore...");
         ESP.restart();
       });
 
     } else {
-      Serial.println(F("[WEBSERVER] No backup found"));
+      Serial.println("[WEBSERVER] No backup found");
       DynamicJsonDocument errorDoc(128);
       errorDoc[F("error")] = "No backup found.";
       String response;
@@ -370,7 +370,7 @@ void setupWebServer() {
   });
 
   server.on("/ap_status", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.print(F("[WEBSERVER] Request: /ap_status. isAPMode = "));
+    Serial.printf("[WEBSERVER] Request: /ap_status. isAPMode = ");
     Serial.println(isAPMode);
     String json = "{\"isAP\": ";
     json += (isAPMode) ? "true" : "false";
@@ -379,53 +379,53 @@ void setupWebServer() {
   });
 
   server.begin();
-  Serial.println(F("[WEBSERVER] Web server started"));
+  Serial.println("[WEBSERVER] Web server started");
 }
 
 void fetchWeather() {
-  Serial.println(F("[WEATHER] Fetching weather data..."));
+  Serial.println("[WEATHER] Fetching weather data...");
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("[WEATHER] Skipped: WiFi not connected"));
+    Serial.println("[WEATHER] Skipped: WiFi not connected");
     weatherAvailable = false;
     weatherFetched = false;
     return;
   }
   if (!openWeatherApiKey || strlen(openWeatherApiKey) != 32) {
-    Serial.println(F("[WEATHER] Skipped: Invalid API key (must be exactly 32 characters)"));
+    Serial.println("[WEATHER] Skipped: Invalid API key (must be exactly 32 characters)");
     weatherAvailable = false;
     weatherFetched = false;
     return;
   }
   if (!(strlen(openWeatherCity) > 0 && strlen(openWeatherCountry) > 0)) {
-    Serial.println(F("[WEATHER] Skipped: City or Country is empty."));
+    Serial.println("[WEATHER] Skipped: City or Country is empty.");
     return;
   }
 
-  Serial.println(F("[WEATHER] Connecting to OpenWeatherMap..."));
+  Serial.println("[WEATHER] Connecting to OpenWeatherMap...");
   const char* host = "api.openweathermap.org";
   String url = "/data/2.5/weather?q=" + String(openWeatherCity) + "," + String(openWeatherCountry) + "&appid=" + openWeatherApiKey + "&units=" + String(weatherUnits);
-  Serial.println(F("[WEATHER] URL: ") + url);
+  Serial.println("[WEATHER] URL: ") + url;
 
   IPAddress ip;
   if (!WiFi.hostByName(host, ip)) {
-    Serial.println(F("[WEATHER] DNS lookup failed!"));
+    Serial.println("[WEATHER] DNS lookup failed!");
     weatherAvailable = false;
     return;
   }
 
   if (!client.connect(host, 80)) {
-    Serial.println(F("[WEATHER] Connection failed"));
+    Serial.println("[WEATHER] Connection failed");
     weatherAvailable = false;
     return;
   }
 
-  Serial.println(F("[WEATHER] Connected, sending request..."));
+  Serial.println("[WEATHER] Connected, sending request...");
   String request = String("GET ") + url + " HTTP/1.1\r\n" +
                    "Host: " + host + "\r\n" +
                    "Connection: close\r\n\r\n";
 
   if (!client.print(request)) {
-    Serial.println(F("[WEATHER] Failed to send request!"));
+    Serial.println("[WEATHER] Failed to send request!");
     client.stop();
     weatherAvailable = false;
     return;
@@ -448,7 +448,7 @@ void fetchWeather() {
     if (line.startsWith("HTTP/1.1")) {
       int statusCode = line.substring(9, 12).toInt();
       if (statusCode != 200) {
-        Serial.print(F("[WEATHER] HTTP error: "));
+        Serial.printf("[WEATHER] HTTP error: ");
         Serial.println(statusCode);
         client.stop();
         weatherAvailable = false;
@@ -470,18 +470,18 @@ void fetchWeather() {
   client.stop();
 
   if (millis() - weatherStart >= weatherTimeout) {
-    Serial.println(F("[WEATHER] ERROR: Weather fetch timed out!"));
+    Serial.println("[WEATHER] ERROR: Weather fetch timed out!");
     weatherAvailable = false;
     return;
   }
 
-  Serial.println(F("[WEATHER] Response received."));
-  Serial.println(F("[WEATHER] Payload: ") + payload);
+  Serial.println("[WEATHER] Response received.");
+  Serial.println("[WEATHER] Payload: ") + payload;
 
   DynamicJsonDocument doc(2048);
   DeserializationError error = deserializeJson(doc, payload);
   if (error) {
-    Serial.print(F("[WEATHER] JSON parse error: "));
+    Serial.println("[WEATHER] JSON parse error: ");
     Serial.println(error.f_str());
     weatherAvailable = false;
     return;
@@ -493,7 +493,7 @@ void fetchWeather() {
     Serial.printf("[WEATHER] Temp: %s\n", currentTemp.c_str());
     weatherAvailable = true;
   } else {
-    Serial.println(F("[WEATHER] Temperature not found in JSON payload"));
+    Serial.println("[WEATHER] Temperature not found in JSON payload");
     weatherAvailable = false;
     return;
   }
@@ -510,7 +510,7 @@ void fetchWeather() {
     weatherDescription = String(desc);
     Serial.printf("[WEATHER] Description: %s\n", weatherDescription.c_str());
   } else {
-    Serial.println(F("[WEATHER] Weather description not found in JSON payload"));
+    Serial.println("[WEATHER] Weather description not found in JSON payload");
   }
   weatherFetched = true;
 }
@@ -518,19 +518,19 @@ void fetchWeather() {
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  Serial.println(F("[SETUP] Starting setup..."));
+  Serial.println("[SETUP] Starting setup...");
   P.begin();
   P.setFont(mFactory); // Custom font
   loadConfig(); // Load config before setting intensity & flip
   P.setIntensity(brightness);
   P.setZoneEffect(0, flipDisplay, PA_FLIP_UD);
   P.setZoneEffect(0, flipDisplay, PA_FLIP_LR);
-  Serial.println(F("[SETUP] Parola (LED Matrix) initialized"));
+  Serial.println("[SETUP] Parola (LED Matrix) initialized");
   connectWiFi();
-  Serial.println(F("[SETUP] Wifi connected"));  
+  Serial.println("[SETUP] Wifi connected");  
   setupWebServer();
-  Serial.println(F("[SETUP] Webserver setup complete"));  
-  Serial.println(F("[SETUP] Setup complete"));
+  Serial.println("[SETUP] Webserver setup complete");  
+  Serial.println("[SETUP] Setup complete");
   Serial.println();
   printConfigToSerial();
   setupTime(); // Start NTP sync process
@@ -583,16 +583,16 @@ void loop() {
     case NTP_SYNCING: {
       time_t now = time(nullptr);
       if (now > 1000) {
-        Serial.println(F("\n[TIME] NTP sync successful."));
+        Serial.println("\n[TIME] NTP sync successful.");
         ntpSyncSuccessful = true;
         ntpState = NTP_SUCCESS;
       } else if (millis() - ntpStartTime > ntpTimeout || ntpRetryCount > maxNtpRetries) {
-        Serial.println(F("\n[TIME] NTP sync failed."));
+        Serial.println("\n[TIME] NTP sync failed.");
         ntpSyncSuccessful = false;
         ntpState = NTP_FAILED;
       } else {
         if (millis() - ntpStartTime > (ntpRetryCount * 1000)) {
-          Serial.print(".");
+          Serial.printf(".");
           ntpRetryCount++;
         }
       }
@@ -621,7 +621,7 @@ void loop() {
         lastFetch = millis();
     }
     if (millis() - lastFetch > fetchInterval) {
-        Serial.println(F("[LOOP] Fetching weather data..."));
+        Serial.println("[LOOP] Fetching weather data...");
         weatherFetched = false;
         fetchWeather();
         lastFetch = millis();
@@ -697,7 +697,7 @@ void loop() {
       weatherWasAvailable = true;
     } else {
       if (weatherWasAvailable) {
-        Serial.println(F("[DISPLAY] Weather not available, showing clock..."));
+        Serial.println("[DISPLAY] Weather not available, showing clock...");
         weatherWasAvailable = false;
       }
       if (ntpSyncSuccessful) {
