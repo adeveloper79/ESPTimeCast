@@ -1,12 +1,17 @@
 ![ESPTimeCast](assets/logo.svg)
 
-**ESPTimeCast** is a WiFi-connected LED matrix clock and weather station based on ESP8266 and MAX7219.  
+**ESPTimeCast** is a WiFi-connected LED matrix clock and weather station based on ESP32 and MAX7219.  
 It displays the current time, day of the week (with custom symbols), and local weather (temp/humidity) fetched from OpenWeatherMap.  
 Setup and configuration are fully managed via a built-in web interface.  
 
 ![clock - weather](assets/demo.gif) 
 
 
+## ☕ Support the original Author
+
+If you like this project, you can [buy him/her a coffee](https://paypal.me/officialuphoto)!
+
+---
 <img src="assets/image01.png" alt="3D Printable Case" width="320" max-width="320" />
 
 Get the 3D printable case!
@@ -40,16 +45,16 @@ Get the 3D printable case!
     
 ---
 
-## 🪛 Wiring
+## 💥 Wiring
 
-**Wemos D1 Mini (ESP8266) → MAX7219**
+**NodeMCU-32S (ESP32) → MAX7219**
 
-| Wemos D1 Mini | MAX7219 |
+| NodeMCU-32S | MAX7219 |
 |:-------------:|:-------:|
 | GND           | GND     |
-| D6            | CLK     |
-| D7            | CS      |
-| D8            | DIN     |
+| 12            | CLK     |
+| 13            | CS      |
+| 15            | DIN     |
 | 3V3           | VCC     |
 
 ---
@@ -109,34 +114,15 @@ Click the **cog icon** next to “Advanced Settings” in the web UI to reveal e
 ## 🔧 Installation
 
 1. **Clone this repo**
-2. **Flash the ESP8266** using Arduino IDE or PlatformIO
+2. **Flash the ESP32** using PlatformIO
 3. **Upload `/data` folder** with LittleFS uploader (see below)
 
-### Board Setup
-
-- Install ESP8266 board package:  
-  `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
-- Select **Wemos D1 Mini** (or your ESP8266 variant) in Tools → Board
-
-### Dependencies
-
-Install these libraries (Library Manager / PlatformIO):
-
-- `ArduinoJson` by Benoit Blanchon
-- `MD_Parola / MD_MAX72xx` all dependencies by majicDesigns
-- `ESPAsyncTCP` by ESP32Async
-- `ESPAsyncWebServer` by ESP32Async
-
 ### LittleFS Upload
-
-Install the [LittleFS Uploader](https://randomnerdtutorials.com/arduino-ide-2-install-esp8266-littlefs/).
-
 **To upload `/data`:**
 
-1. Open Command Palette:
-   - Windows: `Ctrl+Shift+P`
-   - macOS: `Cmd+Shift+P`
-2. Run: `Upload LittleFS to ESP8266`
+* Click PlatformIO icon
+   1. Build Filesystem Image
+   2. Upload Filesystem Image
 
 **Important:** Serial Monitor **must be closed** before uploading!
 
@@ -174,13 +160,4 @@ The following table summarizes what will appear on the display in each scenario:
 
 ---
 
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss.
-
----
-
-## ☕ Support this project
-
-If you like this project, you can [buy me a coffee](https://paypal.me/officialuphoto)!
 
